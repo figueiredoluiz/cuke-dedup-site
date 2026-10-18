@@ -21,7 +21,8 @@ export default defineConfig({
       title: 'CukeDedup',
       description:
         'A fast static analyzer for duplicate, ambiguous, reusable, and unused Cucumber/Gherkin step definitions.',
-      logo: { src: './src/assets/logo.svg' },
+      logo: { src: './src/assets/icon.png' },
+      favicon: '/favicon.png',
       customCss: ['./src/styles/starlight.css'],
       social: [
         {
@@ -38,7 +39,11 @@ export default defineConfig({
       head: [
         {
           tag: 'link',
-          attrs: { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+          attrs: { rel: 'icon', type: 'image/png', sizes: '48x48', href: '/favicon.png' },
+        },
+        {
+          tag: 'link',
+          attrs: { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
         },
         {
           tag: 'meta',
