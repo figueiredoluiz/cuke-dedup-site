@@ -1,0 +1,81 @@
+---
+const frameworks = [
+  {
+    name: 'Cucumber.js',
+    detail:
+      '`@cucumber/cucumber` and legacy `cucumber`; ESM, CJS, aliases, namespaces, and static local re-exports.',
+  },
+  {
+    name: 'Playwright-BDD',
+    detail: '`createBdd()` registrations and `playwright-bdd/decorators` class-method decorators.',
+  },
+  {
+    name: 'Cypress Cucumber',
+    detail:
+      '`@badeball/cypress-cucumber-preprocessor` and legacy `cypress-cucumber-preprocessor/steps`.',
+  },
+  {
+    name: 'Jest-Cucumber',
+    detail: '`defineFeature` → scenario → step callbacks, with handler-reuse rules.',
+  },
+  {
+    name: 'Vitest Cucumber Plugin',
+    detail: 'ESM `Given`, `When`, and `Then` exports; global step registry.',
+  },
+];
+---
+
+<section id="frameworks" class="border-t border-line bg-panel/40">
+  <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+    <p class="text-sm font-semibold uppercase tracking-widest text-accent">Works with your stack</p>
+    <h2 class="mt-3 max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">
+      Five workflows, one analyzer.
+    </h2>
+    <p class="mt-4 max-w-2xl leading-relaxed text-muted">
+      Package entrypoints are matched exactly, so registrations are only recognized when they come
+      from a supported package. Classic <code class="font-mono text-[13px]">.feature</code> files
+      and Gherkin Markdown <code class="font-mono text-[13px]">.feature.md</code> files are both
+      discovered. Experimental, opt-in Cucumber-Ruby support covers an explicitly selected subset.
+    </p>
+
+    <div class="mt-10 overflow-hidden rounded-xl border border-line">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-accent-soft">
+          <tr>
+            <th scope="col" class="px-5 py-3 font-semibold">
+              Workflow
+            </th>
+            <th scope="col" class="px-5 py-3 font-semibold">
+              Recognized registrations
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line bg-panel">
+          {frameworks.map((framework) => (
+            <tr>
+              <td class="px-5 py-3.5 font-semibold">{framework.name}</td>
+              <td
+                class="px-5 py-3.5 leading-relaxed text-muted"
+                set:html={framework.detail.replace(
+                  /`([^`]+)`/g,
+                  '<code class="font-mono text-[12.5px] text-accent-strong dark:text-accent">$1</code>',
+                )}
+              />
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4 text-sm text-muted">
+      Plain Playwright projects are supported when their Gherkin bindings use Cucumber.js or
+      Playwright-BDD.
+      <a
+        href="/docs/discovery-and-frameworks/"
+        class="ml-1 font-medium text-accent hover:underline"
+      >
+        Discovery details →
+      </a>
+    </p>
+  </div>
+</section>

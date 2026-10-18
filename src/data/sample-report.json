@@ -1,0 +1,279 @@
+{
+  "schemaVersion": "3",
+  "summary": {
+    "definitionsAnalyzed": 11,
+    "featureStepsAnalyzed": 12,
+    "findings": 6,
+    "errors": 3,
+    "warnings": 3,
+    "suppressed": 0,
+    "byRule": {
+      "ambiguous-step": 2,
+      "duplicate-matcher": 1,
+      "parameterization-candidate": 1,
+      "unused-definition": 2
+    },
+    "duplication": {
+      "threshold": 0.0,
+      "duplicatedDefinitions": 2,
+      "totalDefinitions": 11,
+      "percentage": 18.181818181818183,
+      "passed": false,
+      "rules": ["duplicate-matcher"]
+    }
+  },
+  "metrics": {
+    "definitionFiles": 3,
+    "featureFiles": 2,
+    "filesDiscovered": 5,
+    "discoveryMs": 4.7311250000000005,
+    "parsingMs": 9.260958,
+    "analysisMs": 1.460208
+  },
+  "corpus": {
+    "definitionFiles": 3,
+    "definitionFilesWithDefinitions": 3,
+    "definitionsExtracted": 11,
+    "featureFiles": 2,
+    "featureFilesParsed": 2,
+    "featureFilesWithoutSteps": 0,
+    "incomplete": false
+  },
+  "analysis": {
+    "truncated": false,
+    "candidateComparisonsEvaluated": 2,
+    "skippedCandidateComparisons": 0,
+    "truncatedStructuralClasses": 0,
+    "candidateSources": {
+      "identicalHandler": {
+        "evaluated": 0,
+        "skipped": 0
+      },
+      "matcherBlocking": {
+        "evaluated": 0,
+        "skipped": 0
+      },
+      "matcherOverlap": {
+        "evaluated": 0,
+        "skipped": 0
+      },
+      "normalizedMatcher": {
+        "evaluated": 1,
+        "skipped": 0
+      },
+      "structuralHandler": {
+        "evaluated": 1,
+        "skipped": 0
+      }
+    }
+  },
+  "findings": [
+    {
+      "rule": "ambiguous-step",
+      "severity": "error",
+      "message": "Feature step `the user signs in with a valid password` matches 2 definitions",
+      "primary": {
+        "path": "features/login.feature",
+        "line": 5,
+        "column": 5,
+        "endLine": 5,
+        "endColumn": 49
+      },
+      "related": [
+        {
+          "path": "features/steps/login.steps.ts",
+          "line": 7,
+          "column": 1,
+          "endLine": 9,
+          "endColumn": 3
+        },
+        {
+          "path": "features/steps/session.steps.ts",
+          "line": 4,
+          "column": 1,
+          "endLine": 6,
+          "endColumn": 3
+        }
+      ],
+      "relatedLocationsTruncated": false,
+      "evidence": {
+        "matcherSimilarity": null,
+        "handlerSimilarity": null,
+        "matcherDifference": "`the user signs in with a valid password`, `the user signs in with a valid password`",
+        "handlerEvidence": "More than one definition accepts at least one concrete feature step"
+      },
+      "suggestedAction": "Make the matchers mutually exclusive",
+      "suppression": null
+    },
+    {
+      "rule": "ambiguous-step",
+      "severity": "error",
+      "message": "Feature step `the user signs in with a valid password` matches 2 definitions",
+      "primary": {
+        "path": "features/login.feature",
+        "line": 10,
+        "column": 5,
+        "endLine": 10,
+        "endColumn": 49
+      },
+      "related": [
+        {
+          "path": "features/steps/login.steps.ts",
+          "line": 7,
+          "column": 1,
+          "endLine": 9,
+          "endColumn": 3
+        },
+        {
+          "path": "features/steps/session.steps.ts",
+          "line": 4,
+          "column": 1,
+          "endLine": 6,
+          "endColumn": 3
+        }
+      ],
+      "relatedLocationsTruncated": false,
+      "evidence": {
+        "matcherSimilarity": null,
+        "handlerSimilarity": null,
+        "matcherDifference": "`the user signs in with a valid password`, `the user signs in with a valid password`",
+        "handlerEvidence": "More than one definition accepts at least one concrete feature step"
+      },
+      "suggestedAction": "Make the matchers mutually exclusive",
+      "suppression": null
+    },
+    {
+      "rule": "duplicate-matcher",
+      "severity": "error",
+      "message": "Two step definitions use the same effective matcher",
+      "primary": {
+        "path": "features/steps/login.steps.ts",
+        "line": 7,
+        "column": 1,
+        "endLine": 9,
+        "endColumn": 3
+      },
+      "related": [
+        {
+          "path": "features/steps/session.steps.ts",
+          "line": 4,
+          "column": 1,
+          "endLine": 6,
+          "endColumn": 3
+        }
+      ],
+      "relatedLocationsTruncated": false,
+      "evidence": {
+        "matcherSimilarity": 1.0,
+        "handlerSimilarity": 0.0,
+        "matcherDifference": "Matchers are textually identical",
+        "handlerEvidence": "Handler behavior signatures differ",
+        "comparison": {
+          "leftFingerprint": "50e589edddb61a8c1250e0cacac01d2f",
+          "rightFingerprint": "939955775260b547a2171a0a38eb64b4",
+          "leftMatcher": "the user signs in with a valid password",
+          "rightMatcher": "the user signs in with a valid password",
+          "leftHandler": "function () {\n  this.signedIn = true;\n}",
+          "rightHandler": "function () {\n  this.authenticated = true;\n}",
+          "matcherDiff": {
+            "prefix": "the user signs in with a valid password",
+            "leftChange": "",
+            "rightChange": "",
+            "suffix": ""
+          }
+        }
+      },
+      "suggestedAction": "Keep one definition or make the matchers intentionally distinct",
+      "suppression": null
+    },
+    {
+      "rule": "parameterization-candidate",
+      "severity": "warning",
+      "message": "Handler structures differ primarily in literal values",
+      "primary": {
+        "path": "features/steps/checkout.steps.ts",
+        "line": 3,
+        "column": 1,
+        "endLine": 5,
+        "endColumn": 3
+      },
+      "related": [
+        {
+          "path": "features/steps/checkout.steps.ts",
+          "line": 7,
+          "column": 1,
+          "endLine": 9,
+          "endColumn": 3
+        }
+      ],
+      "relatedLocationsTruncated": false,
+      "evidence": {
+        "matcherSimilarity": 0.971,
+        "handlerSimilarity": 0.95,
+        "matcherDifference": "`the cart has 5 items` ↔ `the cart has 10 items`",
+        "handlerEvidence": "Handlers have the same control flow and calls after literal normalization",
+        "comparison": {
+          "leftFingerprint": "50fb0dac094129199fab933e5f81d40f",
+          "rightFingerprint": "51f659b03ae4336a14711d586778c348",
+          "leftMatcher": "the cart has 5 items",
+          "rightMatcher": "the cart has 10 items",
+          "leftHandler": "function () {\n  this.cart = { count: 5 };\n}",
+          "rightHandler": "function () {\n  this.cart = { count: 10 };\n}",
+          "matcherDiff": {
+            "prefix": "the cart has ",
+            "leftChange": "5",
+            "rightChange": "10",
+            "suffix": " items"
+          }
+        }
+      },
+      "suggestedAction": "Consider replacing the literal differences with a step parameter",
+      "suppression": null
+    },
+    {
+      "rule": "unused-definition",
+      "severity": "warning",
+      "message": "Step definition `the dashboard gets displayed` is not used by the feature corpus",
+      "primary": {
+        "path": "features/steps/session.steps.ts",
+        "line": 9,
+        "column": 1,
+        "endLine": 11,
+        "endColumn": 3
+      },
+      "related": [],
+      "relatedLocationsTruncated": false,
+      "evidence": {
+        "matcherSimilarity": null,
+        "handlerSimilarity": null,
+        "matcherDifference": "No discovered feature step matched this definition",
+        "handlerEvidence": ""
+      },
+      "suggestedAction": "Remove the definition or add the missing feature usage",
+      "suppression": null
+    },
+    {
+      "rule": "unused-definition",
+      "severity": "warning",
+      "message": "Step definition `an administrator has signed in` is not used by the feature corpus",
+      "primary": {
+        "path": "features/steps/session.steps.ts",
+        "line": 14,
+        "column": 1,
+        "endLine": 16,
+        "endColumn": 3
+      },
+      "related": [],
+      "relatedLocationsTruncated": false,
+      "evidence": {
+        "matcherSimilarity": null,
+        "handlerSimilarity": null,
+        "matcherDifference": "No discovered feature step matched this definition",
+        "handlerEvidence": ""
+      },
+      "suggestedAction": "Remove the definition or add the missing feature usage",
+      "suppression": null
+    }
+  ],
+  "findingsTruncated": 0
+}

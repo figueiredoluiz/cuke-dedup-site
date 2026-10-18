@@ -1,0 +1,146 @@
+[
+  {
+    "body": "New `--emit-fingerprints` flag and faster TypeScript and Ruby extraction on large files. Findings are unchanged from v0.12.2.\n\n## Features\n- `--emit-fingerprints FILE` writes one JSON line per analyzed definition with the matcher and handler evidence the analyzer compared, for test tooling that must tell \"no finding\" apart from \"nothing analyzed\". Reports, stdout, stderr and exit codes are unchanged with or without it (#182).\n\n## Performance\n- TypeScript evaluates literal module constants once per file instead of once per handler; 4,000 handlers with one constant each in one file: 167 s -\u003e 0.47 s parse (#175).\n- Ruby indexes file-level bindings once per file instead of once per block handler; 8,000 handlers in one file: 150.5 s -\u003e 0.7 s parse (#170).\n\n## Fixes\n- Gherkin parse-error messages list the expected tokens in sorted order; the order previously varied between runs on identical input (#173).\n\n## Development\n- `check:equivalence` compares every report and baseline file each invocation writes or deletes, byte for byte, across the corpus, Ruby, language-parity, benchmark and `tests/cli.rs` suites (#174, #176-#181).\n- The recall corpus verifies declared non-findings against `--emit-fingerprints` records (#184).\n- The Ruby census pins Rust test names instead of file hashes (#171).\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.12.2...v0.13.0\n",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.13.0",
+    "name": "v0.13.0",
+    "prerelease": false,
+    "published_at": "2026-10-17T17:00:18Z",
+    "tag_name": "v0.13.0"
+  },
+  {
+    "body": "Faster analysis. Findings and reports are unchanged from v0.12.1.\n\n## Performance\n* TypeScript extraction indexes each file's top-level declarations once instead of rescanning the file per handler; extraction time now grows linearly with file size. 10,000 definitions in one file: 37.3 s -\u003e 1.1 s (#158)\n* Matcher similarity uses bit-parallel Levenshtein and Jaro-Winkler for ASCII matchers and computes word lists once per definition; candidate-heavy analysis is about 55% faster (#164)\n\n## Documentation\n* Doc comments across the analysis core, model, source-adapter contract, command-line shell and release scripts (#159, #160, #161, #162)\n\n## Development\n* `check-docstrings.mjs` validates doc comments on touched functions in CI and the pre-push hook (#163)\n* `benchmark:check` gates superlinear growth as a ratio of parse times between two sizes of a profile (#158)\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.12.1...v0.12.2\n",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.12.2",
+    "name": "v0.12.2 — faster analysis",
+    "prerelease": false,
+    "published_at": "2026-10-15T19:47:37Z",
+    "tag_name": "v0.12.2"
+  },
+  {
+    "body": "Dependency updates. Analyzer output is unchanged from v0.12.0.\n\n## Dependencies\n* tree-sitter 0.27.1, tree-sitter-language 0.1.9, serde_json 1.0.152 (#151, #152)\n* GitHub Actions: upload-artifact 7.0.2, download-artifact 8.0.2, setup-node 7.1.0, dorny/test-reporter 3.2.0, CodeQL init and analyze 4.38.3 (#150, #153–#156)\n\n## Development\n* `npm run check:equivalence` compares analyzer output against the latest release across the corpus, Ruby, language-parity and benchmark checkers (#149)\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.12.0...v0.12.1\n",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.12.1",
+    "name": "v0.12.1 — dependency updates",
+    "prerelease": false,
+    "published_at": "2026-10-14T17:42:15Z",
+    "tag_name": "v0.12.1"
+  },
+  {
+    "body": "Ruby runs can now report findings on code that 0.11.0 marked incomplete; review exit codes under `--fail-on-*`.\n\n## Ruby (experimental)\n* Oversized dependency-only providers are an incomplete load instead of a run failure (#142)\n* Receiverless literal calls are parameterized in handler comparison (#143)\n* Bounded regexp resource-limit diagnostics, lexical NUL handling, named-handler capture resolution, overlap witnesses for array-form `ParameterType` (#146)\n* NULs in quoted Ruby symbols no longer drop later registrations (#147)\n\n## Gherkin\n* Table budget and escape diagnostics report the precise file and location (#144, #146)\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.11.0...v0.12.0\n",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.12.0",
+    "name": "v0.12.0 — Ruby parity fixes",
+    "prerelease": false,
+    "published_at": "2026-10-13T18:51:20Z",
+    "tag_name": "v0.12.0"
+  },
+  {
+    "body": "## Experimental Cucumber-Ruby support\n\nCukeDedup 0.11.0 adds experimental, opt-in analysis for Cucumber-Ruby suites. Select definition and feature roots explicitly, include support files, and analyze each suite separately:\n\n```sh\ncuke-dedup path/to/project --definitions 'features/**/*.rb' --features 'features/**/*.feature'\n```\n\nSupported Ruby inputs include direct step registrations, static Cucumber Expressions and Ruby regexes, bounded local source dependencies, handler comparisons, matcher overlap, ambiguity and unused-definition checks. Ruby projects are parsed statically; no Ruby code is executed and no gems are installed. Default discovery remains JavaScript/TypeScript-only.\n\nRuby support is incomplete. Reflective rebinding and indirect DSL mutation can escape tracking, NUL-bearing sources are unsupported, array-form ParameterType regexps can miss overlaps, and some resource-limit cases have stricter exits or imprecise diagnostics. Review findings against source. Read the [supported subset](https://github.com/figueiredoluiz/cuke-dedup/blob/v0.11.0/docs/discovery-and-frameworks.md#cucumber-ruby) and [trusted Ruby load-path boundary](https://github.com/figueiredoluiz/cuke-dedup/blob/v0.11.0/docs/configuration.md#ruby-dependency-sources) before enabling Ruby checks in CI.\n\n## Other changes\n\n- Improved Ruby registration provenance, syntax diagnostics, handler comparisons and bounded analysis work.\n- Improved Windows verbatim-path normalization.\n- Reused complete feature-match results to reduce repeated matching work, with deterministic performance and memory checks.\n- Added broader behavioral corpus, cross-platform and packaging validation.\n\n## Compatibility\n\nGit-revision baselines retain findings from an incomplete historical scan and warn that missed historical findings can appear as new. A historical scan that extracts no definitions while the current scan has definitions still fails; use `--fail-on-incomplete` to reject any incomplete baseline. See [Git revision baselines](https://github.com/figueiredoluiz/cuke-dedup/blob/v0.11.0/docs/ci-and-baselines.md#compare-against-a-git-revision).\n\nNative archives and npm packages cover Linux glibc/musl, macOS and Windows on x64 and ARM64. The minimum Rust version remains 1.90.\n",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.11.0",
+    "name": "v0.11.0 — Experimental Cucumber-Ruby support",
+    "prerelease": false,
+    "published_at": "2026-10-12T21:13:12Z",
+    "tag_name": "v0.11.0"
+  },
+  {
+    "body": "## What's Changed\n* fix: mark unresolved TypeScript matchers incomplete by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/82\n* fix: exclude inert local methods from registration uncertainty by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/83\n* chore: bump version to 0.10.1 by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/84\n\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.10.0...v0.10.1",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.10.1",
+    "name": "v0.10.1",
+    "prerelease": false,
+    "published_at": "2026-10-01T11:10:50Z",
+    "tag_name": "v0.10.1"
+  },
+  {
+    "body": "## What's Changed\n* test: document parser grammar limitations by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/65\n* feat: support Jest-Cucumber and Vitest Cucumber Plugin by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/66\n* test: pin ambiguity analysis corpus boundaries by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/67\n* test: expand Gherkin corpus and reporter parity by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/68\n* fix: resolve registrations through lexical bindings by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/69\n* chore(deps): bump taiki-e/install-action from 2.87.16 to 2.87.20 by @dependabot[bot] in https://github.com/figueiredoluiz/cuke-dedup/pull/71\n* chore(deps): bump github/codeql-action/init from 4.38.1 to 4.38.2 by @dependabot[bot] in https://github.com/figueiredoluiz/cuke-dedup/pull/70\n* chore(deps): bump github/codeql-action/analyze from 4.38.1 to 4.38.2 by @dependabot[bot] in https://github.com/figueiredoluiz/cuke-dedup/pull/72\n* fix: retry missing Action release assets by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/74\n* chore: prepare v0.10.0 release by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/73\n\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.9.0...v0.10.0",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.10.0",
+    "name": "v0.10.0",
+    "prerelease": false,
+    "published_at": "2026-09-29T03:40:49Z",
+    "tag_name": "v0.10.0"
+  },
+  {
+    "body": "## What's Changed\n* fix(analysis): tighten parameterization and near-duplicate precision by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/61\n* fix(resolution): resolve workspace tsconfig package bases and skip unavailable ones by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/62\n* fix(resolution): treat inert CommonJS exports as modeled and register import-equals bindings by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/63\n* chore(release): prepare v0.9.0 by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/64\n\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.8.0...v0.9.0",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.9.0",
+    "name": "v0.9.0",
+    "prerelease": false,
+    "published_at": "2026-09-25T23:12:39Z",
+    "tag_name": "v0.9.0"
+  },
+  {
+    "body": "## What's Changed\n* fix(analysis): effective-flag matcher identity, with matcher-rule corpus coverage by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/46\n* chore(deps): bump codecov/codecov-action from 7.1.0 to 7.1.1 by @dependabot[bot] in https://github.com/figueiredoluiz/cuke-dedup/pull/49\n* chore(deps): bump taiki-e/install-action from 2.87.11 to 2.87.16 by @dependabot[bot] in https://github.com/figueiredoluiz/cuke-dedup/pull/50\n* fix(discovery): exclude generated and non-source content before parsing by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/52\n* chore: remove third-party license inventory by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/53\n* chore(deps): bump clap from 4.6.6 to 4.6.7 by @dependabot[bot] in https://github.com/figueiredoluiz/cuke-dedup/pull/47\n* chore(deps): bump github/codeql-action/init from 4.38.0 to 4.38.1 by @dependabot[bot] in https://github.com/figueiredoluiz/cuke-dedup/pull/48\n* chore(deps): bump github/codeql-action/analyze from 4.38.0 to 4.38.1 by @dependabot[bot] in https://github.com/figueiredoluiz/cuke-dedup/pull/51\n* perf(analysis): resolve assertion aliases without quadratic scope walks or unbounded propagation by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/54\n* fix(analysis): CommonJS barrel resolution, deferred module constants, and boundary pins by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/55\n* fix(discovery): resolve project-local CommonJS require of a barrel by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/56\n* chore: assertion-collection cleanups and stale-binary warning by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/57\n* feat(cli): tolerate unparseable sources and incomplete baselines by default by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/58\n* test(check): deterministic pre-review gates and a known-issue regression tier by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/59\n* chore(release): prepare v0.8.0 by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/60\n\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.7.0...v0.8.0",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.8.0",
+    "name": "v0.8.0",
+    "prerelease": false,
+    "published_at": "2026-09-24T01:36:25Z",
+    "tag_name": "v0.8.0"
+  },
+  {
+    "body": "## What's Changed\n* perf(analysis): compile matchers in windows to bound peak memory by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/42\n* test(gates): ratchet duplication and floor the recall corpus by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/43\n* fix(fingerprints): use collision-resistant hashes by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/44\n* chore(release): prepare v0.7.0 by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/45\n\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.6.0...v0.7.0",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.7.0",
+    "name": "v0.7.0",
+    "prerelease": false,
+    "published_at": "2026-09-20T20:29:00Z",
+    "tag_name": "v0.7.0"
+  },
+  {
+    "body": "## What's Changed\n* refactor: share duplicated helpers across typescript modules and cli tests by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/37\n* fix(analysis): resolve handler provenance and widen assertion factory trust by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/38\n* test(corpus): make ambiguous-step a gate (#39) by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/40\n* chore(release): prepare v0.6.0 by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/41\n\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.5.0...v0.6.0",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.6.0",
+    "name": "v0.6.0",
+    "prerelease": false,
+    "published_at": "2026-09-18T14:05:00Z",
+    "tag_name": "v0.6.0"
+  },
+  {
+    "body": "## What's Changed\n* feat(analysis): share fingerprints across property-access spellings by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/31\n* feat(report): improve terminal report readability by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/32\n* chore: add GitHub Sponsors funding link by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/33\n* chore: update FUNDING.yml by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/34\n* refactor: extract inline test modules and cover untested analyzer paths by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/35\n* chore(release): prepare v0.5.0 by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/36\n\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.4.0...v0.5.0",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.5.0",
+    "name": "v0.5.0",
+    "prerelease": false,
+    "published_at": "2026-09-16T19:48:03Z",
+    "tag_name": "v0.5.0"
+  },
+  {
+    "body": "## What's Changed\n* refactor(typescript): centralize framework registration metadata by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/18\n* feat(analysis): resolve static computed access and nested destructuring aliases by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/19\n* chore(deps): bump taiki-e/install-action from 2.87.5 to 2.87.11 by @dependabot[bot] in https://github.com/figueiredoluiz/cuke-dedup/pull/22\n* chore(deps): bump github/codeql-action/init from 311b4ee155dcdab395044f00946f664bd51ff173 to b96794f015dfd88f77b49b1c93e0fa7110f94c63 by @dependabot[bot] in https://github.com/figueiredoluiz/cuke-dedup/pull/21\n* chore(deps): bump github/codeql-action/analyze from 311b4ee155dcdab395044f00946f664bd51ff173 to b96794f015dfd88f77b49b1c93e0fa7110f94c63 by @dependabot[bot] in https://github.com/figueiredoluiz/cuke-dedup/pull/20\n* refactor(adapters): isolate backend-owned extraction sessions by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/23\n* ci: upload Rust coverage to Codecov by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/24\n* fix(analysis): treat object rest bindings as shallow copies by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/25\n* ci: add Codecov project reporting and PR summaries by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/26\n* refactor(framework): isolate static config discovery behind an ordered registry by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/27\n* refactor(adapters): unify language routing with the suffix registry table by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/28\n* ci: pin Rust 1.98.1 for development and releases, document Node 24 LTS focus by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/29\n* chore(release): prepare v0.4.0 by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/30\n\n## New Contributors\n* @dependabot[bot] made their first contribution in https://github.com/figueiredoluiz/cuke-dedup/pull/22\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.3.0...v0.4.0",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.4.0",
+    "name": "v0.4.0",
+    "prerelease": false,
+    "published_at": "2026-09-15T17:13:26Z",
+    "tag_name": "v0.4.0"
+  },
+  {
+    "body": "## What's Changed\n* feat(baseline): compare findings against a Git revision by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/15\n* test(analysis): pin assertion chain and alias trust invariants by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/16\n* chore(release): prepare v0.3.0 by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/17\n\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.2.1...v0.3.0",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.3.0",
+    "name": "v0.3.0",
+    "prerelease": false,
+    "published_at": "2026-09-14T09:35:29Z",
+    "tag_name": "v0.3.0"
+  },
+  {
+    "body": "## What's Changed\n* fix(analysis): reduce assertion similarity noise by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/10\n* fix(analysis): equate inline and local assertion values by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/11\n* fix(analysis): restrict assertion facade and namespace trust by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/12\n* fix(analysis): close assertion precision review gaps by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/13\n* chore(release): prepare v0.2.1 by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/14\n\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.2.0...v0.2.1",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.2.1",
+    "name": "v0.2.1",
+    "prerelease": false,
+    "published_at": "2026-09-13T10:20:25Z",
+    "tag_name": "v0.2.1"
+  },
+  {
+    "body": "## What's Changed\n* fix: restore automated npm publishing by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/5\n* feat: harden analysis and expand framework support for v0.2.0 by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/6\n* docs: reorganize project documentation by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/8\n* fix(ci): exclude malformed fixture from CodeQL by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/9\n\n\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.1.1...v0.2.0",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.2.0",
+    "name": "v0.2.0",
+    "prerelease": false,
+    "published_at": "2026-09-11T15:49:46Z",
+    "tag_name": "v0.2.0"
+  },
+  {
+    "body": "## What's Changed\r\n* chore: prepare 0.1.1 release by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/3\r\n* fix: use publishable Windows npm package names by @figueiredoluiz in https://github.com/figueiredoluiz/cuke-dedup/pull/4\r\n\r\n## New Contributors\r\n* @figueiredoluiz made their first contribution in https://github.com/figueiredoluiz/cuke-dedup/pull/3\r\n\r\n**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/compare/v0.1.0...v0.1.1",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.1.1",
+    "name": "v0.1.1",
+    "prerelease": false,
+    "published_at": "2026-09-08T16:53:21Z",
+    "tag_name": "v0.1.1"
+  },
+  {
+    "body": "**Full Changelog**: https://github.com/figueiredoluiz/cuke-dedup/commits/v0.1.0",
+    "html_url": "https://github.com/figueiredoluiz/cuke-dedup/releases/tag/v0.1.0",
+    "name": "v0.1.0",
+    "prerelease": false,
+    "published_at": "2026-09-07T13:45:23Z",
+    "tag_name": "v0.1.0"
+  }
+]

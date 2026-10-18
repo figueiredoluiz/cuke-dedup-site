@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/landing/Hero.astro';
+import ProblemSolution from '../components/landing/ProblemSolution.astro';
+import Features from '../components/landing/Features.astro';
+import ReportShowcase from '../components/reports/ReportShowcase.astro';
+import Frameworks from '../components/landing/Frameworks.astro';
+import Integration from '../components/landing/Integration.astro';
+import Community from '../components/landing/Community.astro';
+import { siteConfig } from '../lib/site';
+
+const title = `${siteConfig.name} — ${siteConfig.tagline}`;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: siteConfig.name,
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'macOS, Linux, Windows',
+  description: siteConfig.description,
+  url: new URL('/', Astro.site).href,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  license: 'https://opensource.org/licenses/MIT',
+  codeRepository: siteConfig.repoUrl,
+  programmingLanguage: 'Rust, TypeScript',
+};
+---
+
+<BaseLayout title={title} description={siteConfig.description} schema={schema}>
+  <Hero />
+  <ProblemSolution />
+  <Features />
+  <ReportShowcase />
+  <Frameworks />
+  <Integration />
+  <Community />
+</BaseLayout>

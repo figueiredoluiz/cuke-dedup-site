@@ -1,0 +1,16 @@
+/* Aligns Starlight's palette with the website tokens in tailwind.css.
+   Dark values live on :root (Starlight's dark default); light overrides
+   sit under [data-theme='light'] like Starlight itself organizes them. */
+:root {
+  --sl-color-accent: #a78bfa;
+  --sl-color-accent-high: #c4b5fd;
+  --sl-color-accent-low: #2a1f4d;
+  --sl-color-black: #0d0b14;
+  --sl-color-white: #faf9fd;
+}
+
+[data-theme='light'] {
+  --sl-color-accent: #7c3aed;
+  --sl-color-accent-high: #5b21b6;
+  --sl-color-accent-low: #ede9fe;
+}

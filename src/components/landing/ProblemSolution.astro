@@ -1,0 +1,93 @@
+---
+const codeSample = [
+  { tone: 'comment', text: '// features/steps/login.steps.ts' },
+  { tone: 'plain', text: "When('the user signs in with a valid password', () => { /* ... */ });" },
+  { tone: 'plain', text: '' },
+  { tone: 'comment', text: '// features/steps/session.steps.ts  — added months later' },
+  { tone: 'plain', text: "When('the user signs in with a valid password', () => { /* ... */ });" },
+];
+
+const toneColor: Record<string, string> = {
+  comment: 'text-[#7d7396]',
+  plain: 'text-[#ded8ef]',
+};
+---
+
+<section class="border-t border-line bg-panel/40">
+  <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+    <p class="text-sm font-semibold uppercase tracking-widest text-accent">The problem</p>
+    <h2 class="mt-3 max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">
+      Step libraries grow quietly — and start contradicting each other.
+    </h2>
+    <p class="mt-4 max-w-2xl leading-relaxed text-muted">
+      In a growing Cucumber suite, new step definitions are added by many people over many months.
+      Nobody notices the exact duplicate, the near-copy that only differs in a literal, or the
+      definition no feature has used for a year — until steps become ambiguous and refactoring feels
+      risky.
+    </p>
+
+    <div class="mt-12 grid gap-10 lg:grid-cols-2">
+      <ul class="space-y-6">
+        {[
+          {
+            title: 'Duplicates and near-duplicates',
+            body: 'Two definitions match the same text — exactly, or after normalization. Whichever runs first wins.',
+          },
+          {
+            title: 'Ambiguous feature steps',
+            body: 'A concrete step in a .feature file matches multiple definitions, and the suite behaves unpredictably.',
+          },
+          {
+            title: 'Copy-paste handlers',
+            body: 'Handlers that differ only in literal values (`5 items` vs `10 items`) instead of using a step parameter.',
+          },
+          {
+            title: 'Dead definitions',
+            body: 'Steps no feature references anymore, still imported, still maintained, still misleading readers.',
+          },
+          {
+            title: 'Rising maintenance cost',
+            body: 'Every duplicated or unused step makes the suite harder to evolve and slower to reason about.',
+          },
+        ].map((item) => (
+          <li class="flex gap-4">
+            <span
+              class="mt-1 inline-block h-2 w-2 shrink-0 rounded-full bg-accent"
+              aria-hidden="true"
+            ></span>
+            <div>
+              <p class="font-semibold">{item.title}</p>
+              <p class="mt-1 leading-relaxed text-muted">{item.body}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <div class="space-y-4">
+        <div class="overflow-hidden rounded-xl border border-line bg-[var(--cd-terminal-bg)]">
+          <div class="border-b border-[var(--cd-terminal-line)] bg-[var(--cd-terminal-panel)] px-4 py-2 font-mono text-xs text-[#7d7396]">
+            two files, one matcher — CukeDedup flags it
+          </div>
+          <pre class="overflow-x-auto p-4 font-mono text-[12px] leading-relaxed"><code>{codeSample.map((line) => (
+            <span class={`block whitespace-pre ${toneColor[line.tone]}`}>{line.text || ' '}</span>
+          ))}</code></pre>
+        </div>
+        <div class="rounded-xl border border-line bg-panel p-5">
+          <p class="text-sm font-semibold">The solution: analysis, not guesswork</p>
+          <p class="mt-2 text-sm leading-relaxed text-muted">
+            CukeDedup compares every discovered definition — matcher text, normalized forms, and
+            handler structure — and reports eight classes of duplication, ambiguity, reuse, and
+            disuse with suggested actions. It is an analysis tool: it tells you exactly what
+            collides and why, and incomplete analysis is reported instead of treated as clean.
+          </p>
+          <a
+            href="/docs/rules/"
+            class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+          >
+            See all eight rules →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,64 @@
+---
+const features = [
+  {
+    title: 'Eight detection rules',
+    body: 'Exact matcher duplicates, normalized equivalents, ambiguous feature steps, overlapping matchers, duplicate handlers, near-duplicates, parameterization candidates, and unused definitions — each with a suggested action.',
+    href: '/docs/rules/',
+    link: 'Rule reference',
+  },
+  {
+    title: 'Five report formats',
+    body: 'Terminal for humans, JSON and JSON Lines for tooling, a searchable self-contained HTML report, and SARIF for GitHub code scanning.',
+    href: '/docs/reports/',
+    link: 'Report formats',
+  },
+  {
+    title: 'Quality gates',
+    body: 'A duplication threshold for CI, semantic baselines so existing findings do not block new work, changed-file analysis, suppressions with reasons, and .cuke-dedupignore patterns.',
+    href: '/docs/ci-and-baselines/',
+    link: 'CI and baselines',
+  },
+  {
+    title: 'Zero-config start, real config when needed',
+    body: 'Conventional discovery gets you running with `cuke-dedup .` — no configuration required. A .cuke-dedup.json, .cuke-dedupignore, and supported framework configs refine it, with CLI flags always winning.',
+    href: '/docs/configuration/',
+    link: 'Configuration',
+  },
+  {
+    title: 'GitHub Action with provenance',
+    body: 'A ready-made Action that downloads a native binary and verifies its checksum and build provenance, with SARIF, report artifacts, and baseline support.',
+    href: '/docs/ci-and-baselines/',
+    link: 'GitHub Action',
+  },
+  {
+    title: 'Built for agents and humans',
+    body: 'An installable Agent Skill for safely interpreting and remediating JSONL findings, plus experimental opt-in Cucumber-Ruby support with a documented subset.',
+    href: '/docs/installation/',
+    link: 'Install the skill',
+  },
+];
+---
+
+<section id="features" class="border-t border-line">
+  <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+    <p class="text-sm font-semibold uppercase tracking-widest text-accent">Features</p>
+    <h2 class="mt-3 max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">
+      Everything a step-definition audit needs — and nothing that executes your code.
+    </h2>
+
+    <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {features.map((feature) => (
+        <article class="group flex flex-col rounded-xl border border-line bg-panel p-6 transition-colors hover:border-accent/40">
+          <h3 class="font-semibold">{feature.title}</h3>
+          <p class="mt-2 flex-1 text-sm leading-relaxed text-muted">{feature.body}</p>
+          <a
+            href={feature.href}
+            class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+          >
+            {feature.link} →
+          </a>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

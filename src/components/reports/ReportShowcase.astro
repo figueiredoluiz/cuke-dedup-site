@@ -1,0 +1,92 @@
+---
+import FindingCard from './FindingCard.astro';
+import { sampleReport, formatPercent, ruleLabels, type RuleId } from '../../lib/report';
+
+const { summary, findings } = sampleReport;
+const activeRules = Object.keys(summary.byRule) as RuleId[];
+const maxRuleCount = Math.max(...Object.values(summary.byRule).map((count) => count ?? 0));
+
+const stats = [
+  { label: 'Definitions analyzed', value: summary.definitionsAnalyzed },
+  { label: 'Feature steps', value: summary.featureStepsAnalyzed },
+  { label: 'Active findings', value: summary.findings },
+  { label: 'Duplication rate', value: formatPercent(summary.duplication.percentage) },
+];
+---
+
+<section id="reports" class="border-t border-line">
+  <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+    <p class="text-sm font-semibold uppercase tracking-widest text-accent">Reports</p>
+    <h2 class="mt-3 max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">
+      Findings you can act on, not just count.
+    </h2>
+    <p class="mt-4 max-w-2xl leading-relaxed text-muted">
+      Every finding carries severity, precise source spans, structured evidence — matcher
+      differences, similarity scores, handler analysis — and a suggested action. The report below is
+      a real <code class="font-mono text-[13px]">cuke-dedup . --reporters json</code> output (schema
+      v3) from a small demo project; expand any finding to inspect it.
+    </p>
+
+    <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {stats.map((stat) => (
+        <div class="rounded-xl border border-line bg-panel p-5">
+          <p class="text-2xl font-bold text-accent">{stat.value}</p>
+          <p class="mt-1 text-sm text-muted">{stat.label}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="mt-10 grid gap-10 lg:grid-cols-[280px_1fr]">
+      <aside class="space-y-6">
+        <div class="rounded-xl border border-line bg-panel p-5">
+          <p class="text-xs font-semibold uppercase tracking-wide text-muted">Findings by rule</p>
+          <ul class="mt-3 space-y-2.5">
+            {activeRules.map((rule) => {
+              const count = summary.byRule[rule] ?? 0;
+              return (
+                <li>
+                  <div class="flex items-baseline justify-between gap-2 text-sm">
+                    <span class="font-mono text-xs">{rule}</span>
+                    <span class="font-mono text-xs text-muted">{count}</span>
+                  </div>
+                  <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-accent-soft">
+                    <div
+                      class="h-full rounded-full bg-accent"
+                      style={`width: ${Math.round((count / maxRuleCount) * 100)}%`}
+                    ></div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+        <div class="rounded-xl border border-line bg-panel p-5 text-sm">
+          <p class="text-xs font-semibold uppercase tracking-wide text-muted">Quality gate</p>
+          <p
+            class={`mt-2 font-semibold ${summary.duplication.passed ? 'text-emerald-500' : 'text-red-500'}`}
+          >
+            {summary.duplication.passed ? 'PASS' : 'FAIL'}
+          </p>
+          <p class="mt-1 leading-relaxed text-muted">
+            {summary.duplication.duplicatedDefinitions} of {summary.duplication.totalDefinitions}{' '}
+            definitions duplicated ({formatPercent(summary.duplication.percentage)}), threshold{' '}
+            {formatPercent(summary.duplication.threshold)}.
+          </p>
+        </div>
+      </aside>
+
+      <div class="space-y-3">
+        {findings.map((finding) => (
+          <FindingCard finding={finding} />
+        ))}
+        <p class="pt-2 text-xs text-muted">
+          Prefer a searchable interface? The analyzer also ships a self-contained HTML report, and
+          SARIF for code scanning.
+          <a href="/docs/reports/" class="ml-1 font-medium text-accent hover:underline">
+            All report formats →
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
