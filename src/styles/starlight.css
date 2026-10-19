@@ -1,16 +1,59 @@
-/* Aligns Starlight's palette with the website tokens in tailwind.css.
-   Dark values live on :root (Starlight's dark default); light overrides
-   sit under [data-theme='light'] like Starlight itself organizes them. */
+@import './tokens.css';
+
+/* Aligns Starlight's palette with the website tokens in tokens.css.
+   Starlight's props.css defines dark values on :root and light overrides
+   under [data-theme='light']. This file is loaded unlayered, so it wins over
+   Starlight's @layer'd defaults in BOTH modes — every variable declared on
+   :root below must therefore be flipped again in the light block, including
+   --sl-color-black/--sl-color-white, or light mode keeps dark backgrounds. */
 :root {
-  --sl-color-accent: #a78bfa;
-  --sl-color-accent-high: #c4b5fd;
+  /* Text ramp (dark: light text on dark bg) */
+  --sl-color-white: var(--cd-ink);
+  --sl-color-gray-1: var(--cd-ink);
+  --sl-color-gray-2: var(--cd-ink);
+  --sl-color-gray-3: var(--cd-muted);
+  --sl-color-gray-4: #6f6590;
+  --sl-color-gray-5: var(--cd-line);
+  --sl-color-gray-6: var(--cd-panel);
+  --sl-color-black: var(--cd-bg);
+
+  /* Accents */
+  --sl-color-accent: var(--cd-accent);
+  --sl-color-accent-high: var(--cd-accent-strong);
   --sl-color-accent-low: #2a1f4d;
-  --sl-color-black: #0d0b14;
-  --sl-color-white: #faf9fd;
+
+  /* Flat surfaces like the landing header: nav and sidebar share the page bg */
+  --sl-color-bg-nav: var(--cd-bg);
+  --sl-color-bg-sidebar: var(--cd-bg);
+
+  /* Hairlines use the site border color, not Starlight's gray ramp */
+  --sl-color-hairline: var(--cd-line);
+  --sl-color-hairline-light: var(--cd-line);
+  --sl-color-hairline-shade: var(--cd-bg);
 }
 
 [data-theme='light'] {
-  --sl-color-accent: #7c3aed;
-  --sl-color-accent-high: #5b21b6;
+  /* Text ramp flips (light: dark text on light bg) */
+  --sl-color-white: var(--cd-ink);
+  --sl-color-gray-1: var(--cd-ink);
+  --sl-color-gray-2: var(--cd-ink);
+  --sl-color-gray-3: var(--cd-muted);
+  --sl-color-gray-4: #8f87a8;
+  --sl-color-gray-5: var(--cd-line);
+  --sl-color-gray-6: #f2effa;
+  --sl-color-gray-7: var(--cd-panel);
+  --sl-color-black: var(--cd-bg);
+
+  /* Accents */
+  --sl-color-accent: var(--cd-accent);
+  --sl-color-accent-high: var(--cd-accent-strong);
   --sl-color-accent-low: #ede9fe;
+
+  /* Flat surfaces like the landing header */
+  --sl-color-bg-nav: var(--cd-bg);
+  --sl-color-bg-sidebar: var(--cd-bg);
+
+  --sl-color-hairline: var(--cd-line);
+  --sl-color-hairline-light: var(--cd-line);
+  --sl-color-hairline-shade: var(--cd-line);
 }

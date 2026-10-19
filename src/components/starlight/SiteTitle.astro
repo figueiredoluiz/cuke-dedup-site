@@ -1,0 +1,39 @@
+---
+// Overrides Starlight's SiteTitle to render the same wordmark as the landing
+// header (src/components/shared/Logo.astro) instead of Starlight's default
+// large title. Colors come from the shared tokens in src/styles/tokens.css,
+// loaded on docs pages via starlight.css.
+const { siteTitleHref } = Astro.locals.starlightRoute;
+---
+
+<a href={siteTitleHref} class="site-title" aria-label="CukeDedup — home">
+  <img src="/images/icon.png" alt="" width="28" height="28" loading="eager" decoding="async" />
+  <span class="wordmark" translate="no">
+    Cuke<span class="dedup">Dedup</span>
+  </span>
+</a>
+
+<style>
+  .site-title {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    text-decoration: none;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  img {
+    height: 1.75rem;
+    width: 1.75rem;
+  }
+  .wordmark {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--cd-ink);
+    overflow: hidden;
+  }
+  .dedup {
+    color: var(--cd-accent);
+  }
+</style>

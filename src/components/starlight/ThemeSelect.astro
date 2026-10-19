@@ -1,0 +1,85 @@
+---
+// Overrides Starlight's theme dropdown with the same icon-only toggle the
+// landing header uses (src/components/shared/ThemeToggle.astro). It flips the
+// data-theme attribute and persists it under the shared 'starlight-theme'
+// storage key, which Starlight's ThemeProvider reads before paint, so the
+// preference stays in sync across the whole site.
+---
+
+<button type="button" class="sl-theme-toggle" data-theme-toggle aria-label="Toggle dark mode">
+  <svg
+    viewBox="0 0 20 20"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.6"
+    stroke-linecap="round"
+    class="icon-sun"
+    aria-hidden="true"
+  >
+    <circle cx="10" cy="10" r="3.5"></circle>
+    <path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.3 4.3l1 1M14.7 14.7l1 1M15.7 4.3l-1 1M5.3 14.7l-1 1"></path>
+  </svg>
+  <svg
+    viewBox="0 0 20 20"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="icon-moon"
+    aria-hidden="true"
+  >
+    <path d="M16 11.5A6.5 6.5 0 0 1 8.5 4a6.5 6.5 0 1 0 7.5 7.5z"></path>
+  </svg>
+</button>
+
+<style is:global>
+  /* Global because icon visibility keys off the data-theme attribute on
+     <html>, outside this component's scope. */
+  .sl-theme-toggle {
+    display: inline-flex;
+    height: 2.25rem;
+    width: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--cd-line);
+    border-radius: 0.375rem;
+    color: var(--cd-muted);
+    background: transparent;
+    cursor: pointer;
+    transition:
+      color 150ms ease,
+      border-color 150ms ease;
+  }
+  .sl-theme-toggle:hover {
+    color: var(--cd-ink);
+    border-color: var(--cd-accent);
+  }
+  .sl-theme-toggle svg {
+    height: 1rem;
+    width: 1rem;
+  }
+  .sl-theme-toggle .icon-sun {
+    display: none;
+  }
+  .sl-theme-toggle .icon-moon {
+    display: block;
+  }
+  [data-theme='dark'] .sl-theme-toggle .icon-sun {
+    display: block;
+  }
+  [data-theme='dark'] .sl-theme-toggle .icon-moon {
+    display: none;
+  }
+</style>
+
+<script>
+  document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const root = document.documentElement;
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      localStorage.setItem('starlight-theme', next);
+    });
+  });
+</script>

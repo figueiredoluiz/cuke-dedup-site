@@ -24,6 +24,12 @@ export default defineConfig({
       logo: { src: './src/assets/icon.png' },
       favicon: '/favicon.png',
       customCss: ['./src/styles/starlight.css'],
+      // Docs header matches the landing header: shared wordmark and icon
+      // toggle instead of Starlight's default title and theme dropdown.
+      components: {
+        SiteTitle: './src/components/starlight/SiteTitle.astro',
+        ThemeSelect: './src/components/starlight/ThemeSelect.astro',
+      },
       social: [
         {
           icon: 'github',

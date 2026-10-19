@@ -1,36 +1,9 @@
 @import 'tailwindcss';
+@import './tokens.css';
 
 /* Landing pages and Starlight docs share the data-theme attribute and the
    starlight-theme storage key, so one toggle drives the whole site. */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
-
-:root {
-  --cd-bg: #faf9fd;
-  --cd-panel: #ffffff;
-  --cd-ink: #1a1526;
-  --cd-muted: #5d5573;
-  --cd-line: #e6e2f2;
-  --cd-accent: #7c3aed;
-  --cd-accent-strong: #5b21b6;
-  --cd-accent-soft: rgb(124 58 237 / 0.08);
-  --cd-terminal-bg: #14101f;
-  --cd-terminal-panel: #1a1528;
-  --cd-terminal-line: #2b2342;
-}
-
-[data-theme='dark'] {
-  --cd-bg: #0d0b14;
-  --cd-panel: #16121f;
-  --cd-ink: #ece9f5;
-  --cd-muted: #a49bba;
-  --cd-line: #282138;
-  --cd-accent: #a78bfa;
-  --cd-accent-strong: #c4b5fd;
-  --cd-accent-soft: rgb(167 139 250 / 0.12);
-  --cd-terminal-bg: #0a0810;
-  --cd-terminal-panel: #120e1c;
-  --cd-terminal-line: #241d36;
-}
 
 @theme inline {
   --color-bg: var(--cd-bg);
