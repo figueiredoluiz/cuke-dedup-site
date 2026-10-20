@@ -5,28 +5,105 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  # Sent by the cuke-dedup release workflow with client_payload {"tag": "vX.Y.Z"}.
+  repository_dispatch:
+    types: [release-published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Resolve release tag
+        id: release
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pattern='^v[0-9]+\.[0-9]+\.[0-9]+$'
+          latest() {
+            gh api repos/figueiredoluiz/cuke-dedup/releases/latest --jq .tag_name
+          }
+          tag=""
+          if [ "$EVENT_NAME" = repository_dispatch ]; then
+            if ! [[ "$DISPATCH_TAG" =~ $pattern ]]; then
+              echo "Invalid release tag in client_payload: $DISPATCH_TAG" >&2
+              exit 1
+            fi
+            # Any API failure fails the run (dispatches are one-shot; re-run it). Only a release
+            # that the API reports as prerelease or draft falls back to the latest stable one.
+            unstable=$(gh api "repos/figueiredoluiz/cuke-dedup/releases/tags/$DISPATCH_TAG" \
+              --jq '.prerelease or .draft')
+            if [ "$unstable" = false ]; then
+              # A stale or backport dispatch never replaces a newer release.
+              newest=$(latest)
+              tag=$(printf '%s\n%s\n' "$DISPATCH_TAG" "$newest" | sort -V | tail -n 1)
+            else
+              echo "::warning::$DISPATCH_TAG is a prerelease or draft; using the latest stable release."
+            fi
+          fi
+          if [ -z "$tag" ]; then
+            tag=$(latest)
+          fi
+          if ! [[ "$tag" =~ $pattern ]]; then
+            echo "Unexpected release tag: $tag" >&2
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Documenting $tag"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: figueiredoluiz/cuke-dedup
+          ref: refs/tags/${{ steps.release.outputs.tag }}
+          path: cuke-dedup-source
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      # Pull requests must carry the docs of the latest release. Pushes and release dispatches
+      # regenerate them below, so a release never blocks a deploy.
+      - name: Check committed docs match the release
+        if: github.event_name == 'pull_request'
+        run: pnpm check:docs
+        env:
+          CUKE_DEDUP_REPO: ${{ github.workspace }}/cuke-dedup-source
+          CUKE_DEDUP_TAG: ${{ steps.release.outputs.tag }}
+      - run: pnpm sync:docs
+        env:
+          CUKE_DEDUP_REPO: ${{ github.workspace }}/cuke-dedup-source
+          CUKE_DEDUP_TAG: ${{ steps.release.outputs.tag }}
+      - run: pnpm format:check
       - run: pnpm build
         env:
           SITE_URL: https://cukededup.dev
+          PUBLIC_GA_ID: ${{ vars.PUBLIC_GA_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+          CUKE_DEDUP_TAG: ${{ steps.release.outputs.tag }}
+      - run: pnpm check:links
+      # Dependabot and fork pull requests receive no Cloudflare secrets.
       - name: Deploy to Cloudflare Pages
+        if: github.event_name != 'pull_request' || (github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork)
         run: |
           pnpm exec wrangler pages deploy dist \
             --project-name=cuke-dedup-site \
-            --branch="${{ github.head_ref || 'main' }}"
+            --branch="$DEPLOY_BRANCH"
         env:
+          DEPLOY_BRANCH: ${{ github.head_ref || github.ref_name }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

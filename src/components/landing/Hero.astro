@@ -3,7 +3,7 @@ import Terminal from '../shared/Terminal.astro';
 import { siteConfig } from '../../lib/site';
 import { getCurrentVersion } from '../../lib/releases';
 
-const version = getCurrentVersion();
+const version = await getCurrentVersion();
 ---
 
 <section class="relative overflow-hidden">
@@ -36,7 +36,7 @@ const version = getCurrentVersion();
       </p>
       <div class="mt-8 flex flex-wrap items-center gap-3">
         <a
-          href="/docs/quick-start/"
+          href="/docs/#quick-start"
           class="inline-flex h-11 items-center rounded-lg bg-accent px-5 text-sm font-semibold text-white shadow-lg shadow-accent/25 transition-colors hover:bg-accent-strong dark:text-[#14101f]"
         >
           Get Started
@@ -88,7 +88,7 @@ const version = getCurrentVersion();
         title="terminal — cuke-dedup ."
         command="npx cuke-dedup ."
         lines={[
-          { text: 'CukeDedup v0.13.0', tone: 'dim' },
+          { text: `CukeDedup ${version}`, tone: 'dim' },
           { text: '' },
           { text: 'duplicate-matcher', tone: 'rule' },
           {
