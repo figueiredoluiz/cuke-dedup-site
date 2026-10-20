@@ -2,7 +2,7 @@
 // renders the Starlight pages. `scripts/sync-docs.mjs` is the CLI around it.
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
-import { TAG_PATTERN } from '../../src/release-tag.mjs';
+import { TAG_PATTERN, compareVersions } from '../../src/release-tag.mjs';
 import { docsNav } from '../../src/reference-nav.mjs';
 
 export const GITHUB_BASE = 'https://github.com/figueiredoluiz/cuke-dedup';
@@ -29,12 +29,6 @@ const git = (repo, args) =>
     maxBuffer: 64 * 1024 * 1024,
     stdio: ['ignore', 'pipe', 'pipe'],
   });
-
-const compareVersions = (a, b) => {
-  const pa = a.slice(1).split('.').map(Number);
-  const pb = b.slice(1).split('.').map(Number);
-  return pa[0] - pb[0] || pa[1] - pb[1] || pa[2] - pb[2];
-};
 
 /** Resolves the release tag: an explicit value wins, else the newest `vX.Y.Z` tag of the repo. */
 export const resolveTag = (repo, explicit) => {

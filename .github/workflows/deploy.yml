@@ -33,8 +33,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           pattern='^v[0-9]+\.[0-9]+\.[0-9]+$'
+          # `/releases/latest` orders by commit date, so a backport could outrank a newer line;
+          # take the greatest published stable version from the full release list instead.
           latest() {
-            gh api repos/figueiredoluiz/cuke-dedup/releases/latest --jq .tag_name
+            gh api --paginate repos/figueiredoluiz/cuke-dedup/releases \
+              --jq '.[] | select(.prerelease == false and .draft == false) | .tag_name' \
+              | grep -E "$pattern" | sort -V | tail -n 1
           }
           tag=""
           if [ "$EVENT_NAME" = repository_dispatch ]; then

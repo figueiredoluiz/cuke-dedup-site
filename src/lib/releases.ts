@@ -1,5 +1,5 @@
 import releasesJson from '../data/releases.json';
-import { TAG_PATTERN } from '../release-tag.mjs';
+import { TAG_PATTERN, greatestStableTag } from '../release-tag.mjs';
 
 export interface Release {
   tagName: string;
@@ -118,7 +118,7 @@ export const getReleases = (): Promise<Release[]> => (releasesPromise ??= loadRe
 /** The documented version: the pinned release tag, else the newest stable release. */
 export const getCurrentVersion = async (): Promise<string> => {
   const releases = await getReleases();
-  const stable = pinnedTag() ?? releases.find((release) => !release.prerelease)?.tagName;
+  const stable = pinnedTag() ?? greatestStableTag(releases);
   if (!stable) throw new Error('No stable release found in the release data.');
   return stable;
 };

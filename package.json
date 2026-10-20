@@ -14,7 +14,7 @@
     "format:check": "prettier --check .",
     "sync:docs": "node scripts/sync-docs.mjs",
     "check:docs": "node scripts/sync-docs.mjs --check",
-    "test": "node --test tests/sync-docs.test.mjs",
+    "test": "node --test tests/*.test.mjs",
     "check:links": "node scripts/check-links.mjs"
   },
   "dependencies": {
