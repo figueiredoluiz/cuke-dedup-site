@@ -1,7 +1,9 @@
 ---
-title: Configuration
-description: Precedence, every setting, glob semantics, ignore files, suppressions, diagnostics.
+title: "Configuration"
+description: "CukeDedup works without configuration. Add a project configuration only when the built-in discovery or policy does not match the repository."
 ---
+
+<!-- Synced from https://github.com/figueiredoluiz/cuke-dedup docs/configuration.md at v0.13.0 (11a1ae2). Edits belong upstream. -->
 
 CukeDedup works without configuration. Add a project configuration only when the built-in
 discovery or policy does not match the repository.
@@ -19,12 +21,7 @@ built-in defaults
 ```
 
 `--config/-c <file>` bypasses automatic discovery. A missing or malformed explicit file is fatal.
-A relative `--config` path is resolved from the analyzed root, not from the shell's working
-directory, like relative output and baseline paths:
-
-```sh
-cuke-dedup packages/billing --config .cuke-dedup.json   # reads packages/billing/.cuke-dedup.json
-```
+Relative configuration, output, and baseline paths are resolved from the analyzed root.
 
 Without `--config`, CukeDedup stops at the first valid source in this order:
 
@@ -97,7 +94,9 @@ root-relative paths normalized with `/`.
 
 Opt-in languages, currently Ruby, are selected only by a `definitions` pattern that depends on
 their suffix, such as `features/**/*.rb`. A suffix-agnostic pattern such as `features/**` selects
-JS/TS sources and reports the Ruby files it skipped in a warning.
+JS/TS sources and reports the Ruby files it skipped in a warning. A skipped Ruby file that
+dependency resolution follows a load to (a literal top-level `require` or `require_relative`,
+direct or through other loaded files, within the load budget) is analyzed and not reported.
 
 These patterns differ from `.gitignore` and `.cuke-dedupignore`, which use directory-scoped
 gitignore semantics.
@@ -119,7 +118,7 @@ Each file applies to its own subtree and follows gitignore syntax:
 
 Example:
 
-```text
+```gitignore
 # Generated feature sources
 features/generated/*
 **/*.generated.ts
@@ -150,19 +149,21 @@ take the matcher first and handler second.
 
 `registrations` also enables bare registration names that are not ambient by default, including
 lowercase `given`/`when`/`then` used as globals. Without an entry here they are recognised only
-through a resolved import (see [Safety and limitations](/docs/safety-and-limitations/)).
+through a resolved import (see `safety-and-limitations.md`).
 
-`registrations` applies to JS/TS sources only.
+`registrations` applies to JS/TS sources only. Every run still validates each entry as a JavaScript
+identifier, but the Ruby adapter does not read the names; Ruby forwarding helpers are inferred (see
+[Registrations and providers](/docs/discovery-and-frameworks/#registrations-and-providers)).
 
 ## Trusted assertion modules
 
 `assertionModules` names module specifiers whose `expect` export is a real assertion factory.
 
-For JS/TS, CukeDedup recognizes `@playwright/test`, `playwright/test`, `@jest/globals`, `expect`,
-`vitest`, `chai`, and `bun:test` without configuration, and it also trusts the ambient `expect`
-that Jest, Vitest, and Playwright inject. Chain recognition is shape-based, so Chai's
-`expect(x).to.equal(y)` is understood exactly as Jest's `expect(x).toBe(y)` is; only the origin of
-the factory is listed.
+For Ruby, trust requires a preceding resolved source load and a unique, closed assertion namespace. `require_relative`, configured `rubyLoadPaths`, immutable Method/hash/factory aliases and closed fixture re-exports are supported. Configuration may name the load specifier or a project-relative provider path. Source proofs check lookup and forwarding; names alone grant no authority. Reopening, replacement, unknown effects, escapes and shared mutations remove trust. Installed gems and unselected runtime sources are not analyzed.
+
+Supported terminals are `to_be`, `to_equal`, `equal_to`, `to_have_class`, `to_have_value` and `to_be_visible`, with `not`/`to` modifiers and literal dispatch. Expected values support scalar literals, regexes, arrays/hashes, supported source-bound matchers, and binding-sensitive local reads/member access. Unary expressions, ranges, rationals, character literals and mutable values remain unsupported and remove handler-comparison authority. Provider parse errors, relevant cycles and file/byte/read/work limits retain conservative incompleteness. TypeScript-only configuration does not affect unrelated Ruby loads. No project code executes.
+
+For JS/TS, CukeDedup recognizes `@playwright/test`, `playwright/test`, `@jest/globals`, `expect`, `vitest`, `chai`, and `bun:test` without configuration, and it also trusts the ambient `expect` that Jest, Vitest, and Playwright inject. Chain recognition is shape-based, so Chai's `expect(x).to.equal(y)` is understood exactly as Jest's `expect(x).toBe(y)` is; only the origin of the factory is listed.
 
 Declare a module when the factory reaches your steps another way:
 
@@ -176,16 +177,12 @@ A local module that re-exports `expect` is the common case:
 
 ```ts
 // support/fixtures.ts
-export { expect } from '@playwright/test';
+export { expect } from "@playwright/test";
 ```
 
-Without configuration, JS/TS local re-exports remain untrusted: their expected values do not count
-as behavior, so conflicting assertions may produce a `parameterization-candidate`. Configuration
-restores that distinction for both `import` and `require`.
+Without configuration, JS/TS local re-exports remain untrusted: their expected values do not count as behavior, so conflicting assertions may produce a `parameterization-candidate`. Configuration restores that distinction for both `import` and `require`.
 
-Configure only actual assertion factories; trusting unrelated modules can manufacture similarity
-evidence. Ruby trust rules, including `rubyLoadPaths`, are covered in the
-[repository documentation](https://github.com/figueiredoluiz/cuke-dedup/blob/main/docs/configuration.md#ruby-dependency-sources).
+Configure only actual assertion factories; trusting unrelated modules can manufacture similarity evidence.
 
 ## Custom parameter types
 
@@ -219,7 +216,7 @@ A source-local suppression can instead be placed immediately above a registratio
 
 ```ts
 // cuke-dedup:ignore duplicate-handler -- retained for an external compatibility contract
-Given('the legacy flow completes', legacyHandler);
+Given("the legacy flow completes", legacyHandler);
 ```
 
 Ruby uses the same directive in a `#` comment:
@@ -249,9 +246,9 @@ cuke-dedup . \
 ```
 
 `--exclude` may be repeated or receive comma-separated patterns. The analysis-bound overrides
-`--max-candidate-comparisons` and `--max-structural-class-comparisons` are the CLI equivalents of
-the `maxCandidateComparisons` and `maxStructuralClassComparisons` config keys and are subject to
-the same hard safety ceilings.
+`--max-candidate-comparisons` and `--max-structural-class-comparisons` are the CLI equivalents of the
+`maxCandidateComparisons` and `maxStructuralClassComparisons` config keys and are subject to the same
+hard safety ceilings.
 
 Use `--explain-discovery` to show effective pattern origins, selected parsers, matching patterns,
 and definition inputs without changing report output. Use `--print-config` to print the fully
@@ -260,3 +257,15 @@ running discovery.
 
 See [Discovery and frameworks](/docs/discovery-and-frameworks/) for framework-derived defaults and
 incomplete-corpus behavior, and [Rules](/docs/rules/) for severity configuration.
+
+## Ruby dependency sources
+
+Ruby dependency paths are a configuration trust boundary: absolute paths, paths containing `..`, and relative paths through symlinks may resolve outside the analysis root. A configured load-path directory is an explicitly trusted root after canonicalization, including when it is a symlink to an external directory. Only analyze trusted path configuration; discovered registration bodies from those sources may appear in report snippets. Sources are read statically, never executed.
+
+`rubyLoadPaths` lists ordered local directories containing Ruby dependency sources. Paths are relative to the analysis root unless absolute. The analyzer follows direct, literal `require` and `require_relative` calls without executing Ruby or installing gems. Bare `require` names use only these declared load paths; explicit `./` paths use the analysis root. Repeated requires and cycles load each source once. Missing, excluded, dynamic, deferred or non-Ruby dependencies remain incomplete; `load` is not treated as require-once. Pin dependency source revisions outside the analyzer before using them.
+
+```json
+{ "rubyLoadPaths": ["lib", "vendor/aruba/lib"] }
+```
+
+Resolved files can contribute definitions outside the entrypoint globs, but cannot escape the project or explicitly declared load-path roots. An unresolved dependency must not be interpreted as a clean complete corpus.

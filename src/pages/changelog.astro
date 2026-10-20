@@ -4,7 +4,7 @@ import { getReleases, getCurrentVersion, formatDate } from '../lib/releases';
 import { renderMarkdown } from '../lib/markdown';
 import { siteConfig } from '../lib/site';
 
-const releases = getReleases();
+const releases = await getReleases();
 const rendered = await Promise.all(
   releases.map(async (release) => ({
     release,
@@ -13,7 +13,7 @@ const rendered = await Promise.all(
 );
 
 const title = `Changelog — ${siteConfig.name}`;
-const description = `Release history for CukeDedup, from ${releases[releases.length - 1]?.tagName} to ${getCurrentVersion()}.`;
+const description = `Release history for CukeDedup, from ${releases[releases.length - 1]?.tagName} to ${await getCurrentVersion()}.`;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -21,9 +21,7 @@ const description = `Release history for CukeDedup, from ${releases[releases.len
     <p class="text-sm font-semibold uppercase tracking-widest text-accent">Changelog</p>
     <h1 class="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Release history</h1>
     <p class="mt-4 leading-relaxed text-muted">
-      Every published version, newest first. Entries are served from a local fixture (
-      <code class="font-mono text-[13px]">src/data/releases.json</code>) shaped after the GitHub
-      Releases API, so the same page can later consume release data at build time.
+      Every published version, newest first, read from GitHub Releases when the site is built.
     </p>
 
     <div class="mt-10 divide-y divide-line">

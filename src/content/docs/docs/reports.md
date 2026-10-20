@@ -1,17 +1,19 @@
 ---
-title: Reports
-description: Terminal, JSON, JSON Lines, HTML and SARIF output; fingerprint oracle; output bounds.
+title: "Reports"
+description: "JSON, HTML, and SARIF default to reports/cuke-dedup/ and can be redirected with --output. Relative output paths are resolved from the analysis root, not the..."
 ---
+
+<!-- Synced from https://github.com/figueiredoluiz/cuke-dedup docs/reports.md at v0.13.0 (11a1ae2). Edits belong upstream. -->
 
 Choose reporters according to how the result will be consumed:
 
-| Reporter   | Destination | Best for                                       |
-| ---------- | ----------- | ---------------------------------------------- |
-| `terminal` | stdout      | Interactive use and concise CI logs.           |
-| `json`     | File        | Structured integrations and complete metadata. |
-| `jsonl`    | stdout      | Streaming shell and agent workflows.           |
-| `html`     | File        | Searchable human review with theme switching.  |
-| `sarif`    | File        | GitHub code scanning and compatible platforms. |
+| Reporter | Destination | Best for |
+| --- | --- | --- |
+| `terminal` | stdout | Interactive use and concise CI logs. |
+| `json` | File | Structured integrations and complete metadata. |
+| `jsonl` | stdout | Streaming shell and agent workflows. |
+| `html` | File | Searchable human review with theme switching. |
+| `sarif` | File | GitHub code scanning and compatible platforms. |
 
 JSON, HTML, and SARIF default to `reports/cuke-dedup/` and can be redirected with `--output`.
 Relative output paths are resolved from the analysis root, not the shell's working directory. A
@@ -20,15 +22,9 @@ file-only run prints the generated paths to stdout.
 Terminal and JSONL both own stdout and cannot be selected together. JSONL can be combined with
 file reporters without contaminating the stream.
 
-## Terminal
+The terminal report shows the tool version, leaves a blank line after each rule heading and between findings, and ends with the total number of active findings and detection time. Timing covers discovery, parsing, and analysis; `--no-metrics` omits it.
 
-The terminal report shows the tool version, rule headings, findings with primary and related
-locations, and ends with the total number of active findings and detection time. Timing covers
-discovery, parsing, and analysis; `--no-metrics` omits it.
-
-Rule headings are bold cyan, paths are blue, error/warning labels are red/yellow, and footer
-details are gray only when stdout is a terminal. Set `NO_COLOR` to a nonempty value to disable
-color. Piped output and the other report formats contain no ANSI color codes.
+Rule headings are bold cyan, paths are blue, error/warning labels are red/yellow, and footer details are gray only when stdout is a terminal. Set `NO_COLOR` to a nonempty value to disable color. Piped output and the other report formats contain no ANSI color codes.
 
 ## JSON and HTML
 
@@ -60,9 +56,9 @@ cuke-dedup . --reporters jsonl \
 ```
 
 Each finding record is self-contained. It includes a location-independent semantic fingerprint,
-active or suppressed state, threshold contribution, source spans, suggested action, and structured
-evidence. Free-text fields are limited to 2,000 Unicode characters; `truncatedFields` lists
-shortened fields.
+active or suppressed state, threshold contribution, source spans, suggested action, and
+structured evidence. Free-text fields are limited to 2,000 Unicode characters;
+`truncatedFields` lists shortened fields.
 
 The final `type: "summary"` record includes `recordCount`, aggregate counts, threshold outcome,
 analysis status, and optional metrics. Operational warnings and errors stay on stderr so stdout
@@ -84,13 +80,33 @@ permissions.
 
 ## Fingerprint oracle
 
-`--emit-fingerprints FILE` writes the per-definition evidence the analyzer compared, for test
-tooling that must tell "no finding" apart from "nothing analyzed". It is not a reporter: stdout,
-stderr, report files and the exit code are the same with or without it.
+`--emit-fingerprints FILE` writes the per-definition evidence the analyzer compared, for test tooling that must tell "no finding" apart from "nothing analyzed". It is not a reporter: stdout, stderr, report files and the exit code are the same with or without it.
 
-- One compact JSON line per analyzed definition, sorted by path, line and column. A definition
-  from an excluded, unselected or unreadable source, or one removed by an uncertain registration,
-  has no line; an empty corpus writes an empty file.
+- One compact JSON line per analyzed definition, sorted by path, line and column. A definition from an excluded, unselected or unreadable source, or one removed by an uncertain registration, has no line; an empty corpus writes an empty file.
+- Every definition extracted from the current tree is written, including under `--changed-since`; `--baseline-from-ref` does not write the baseline revision's definitions.
+- A relative `FILE` is resolved from the analysis root. Its parent directory must exist.
+- The destination is checked after analysis and before the baseline is updated; the records are written after the baseline step and before any report. A run that fails before the records are written removes a file it created and leaves an existing file unchanged, so use a fresh path per run.
+- The run exits with code 2, with an error naming the path, when the destination:
+  - cannot be created (missing parent directory, no permission);
+  - exists but is not a regular file (a directory, a device or a FIFO);
+  - is the same file as `cuke-dedup.json`, `cuke-dedup.html` or `cuke-dedup.sarif` in the output directory (all three, whatever reporters are enabled) or as the `--baseline` file (with or without `--update-baseline`). A `..` path, a symbolic link, a hard link or a case-insensitive spelling counts only when it leads to one of those files;
+  - cannot be checked against one of those files because the file's identity cannot be read (for example, its directory cannot be searched).
 
-Report presentation bounds — snippet sizes, cluster memberships, and retained-finding caps — are
-listed in [Safety and limitations](/docs/safety-and-limitations/).
+  A rejection truncates nothing, creates no file and changes no baseline. `--print-config` rejects the flag.
+
+Fields, in this order: `schemaVersion` (`"1"`), `path` (root-relative, `/`-separated), `line`, `column`, `domain` (`ecmascript` or `ruby`), `framework`, `registration`, `matcher`, `matcherKind`, `matcherFlags`, `normalizedMatcher`, `definitionFingerprint` (the value reports use as `leftFingerprint`/`rightFingerprint`), and `handler` with `exact`, `normalized`, `alphaNormalized`, `structural`, `behavior`, `comparable` and `trivial`.
+
+Each `handler` representation is a 32-hex digest of the analyzer's comparison key: equal digests mean the analyzer treats that representation as equal. Digests are comparable within one build only. `duplicate-handler`, `parameterization-candidate` and `near-duplicate-step` consider a pair only when both definitions have `comparable: true` and `trivial: false`. Matcher text is written verbatim, without report sanitization or bounds.
+
+## Output safety and bounds
+
+- Handler snippets are bounded before reports embed them.
+- HTML-visible text is escaped.
+- Bidirectional, invisible-format, and Unicode Tag characters are removed.
+- Embedded JSON characters that could close an HTML script element are encoded.
+- Terminal, JSON, HTML, and SARIF retain at most 10,000 findings, prioritizing active errors.
+- A finding retains at most 256 cluster members; full counts and truncation fields remain visible.
+- Summaries and thresholds describe the complete analysis even when presentation is bounded.
+
+See [Safety and limitations](/docs/safety-and-limitations/) for analysis work limits and
+[CI and baselines](/docs/ci-and-baselines/) for report artifacts in automation.

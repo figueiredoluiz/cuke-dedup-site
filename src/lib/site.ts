@@ -12,8 +12,6 @@ export const siteConfig = {
   contributingUrl: 'https://github.com/figueiredoluiz/cuke-dedup/blob/main/CONTRIBUTING.md',
   securityUrl: 'https://github.com/figueiredoluiz/cuke-dedup/blob/main/SECURITY.md',
   releasesUrl: 'https://github.com/figueiredoluiz/cuke-dedup/releases',
-  // Keep in sync with the source repository's latest release.
-  actionVersion: 'v0.13.0',
 } as const;
 
 export const headerNav = [

@@ -1,7 +1,9 @@
 ---
-title: CI and Baselines
-description: GitHub Action, changed-file analysis, semantic baselines, exit codes.
+title: "CI and baselines"
+description: "CukeDedup can gate a repository through its CLI or GitHub Action. Start with warnings or a baseline when introducing it to an established suite, then..."
 ---
+
+<!-- Synced from https://github.com/figueiredoluiz/cuke-dedup docs/ci-and-baselines.md at v0.13.0 (11a1ae2). Edits belong upstream. -->
 
 CukeDedup can gate a repository through its CLI or GitHub Action. Start with warnings or a
 baseline when introducing it to an established suite, then tighten policy deliberately.
@@ -66,9 +68,7 @@ no repository secret or expanded permission. A self-hosted runner must provide `
 For security-sensitive workflows, pin CukeDedup to the release tag's full commit SHA. Use
 `continue-on-error` only when a later step deliberately evaluates the `exit-code` output.
 
-The GitHub Action retries HTTP 404 responses while release assets become available, with at most
-ten attempts and 65 seconds of total backoff per asset. Other HTTP errors, network failures, and
-stream failures stop immediately. Checksum and provenance verification remain required.
+The GitHub Action retries HTTP 404 responses while release assets become available, with at most ten attempts and 65 seconds of total backoff per asset. Other HTTP errors, network failures, and stream failures stop immediately. This tolerates short publication delays; it does not guarantee that a release build will finish within the retry window. Checksum and provenance verification remain required.
 
 ## Changed-file analysis
 
@@ -82,10 +82,7 @@ cuke-dedup . --changed-since origin/main
 Paths remain correct from a repository subdirectory, and untracked files are included. Summary
 definition counts and the duplication-threshold denominator describe the complete corpus.
 
-An empty changed-file set warns. Changed-file filtering does not relax corpus validation:
-operational read, extraction and feature-parse errors remain fatal even in unchanged files. Use
-`--fail-on-unparseable` for definition parse failures or `--fail-on-incomplete` for all
-incompleteness.
+An empty changed-file set warns. Changed-file filtering does not relax corpus validation: operational read, extraction and feature-parse errors remain fatal even in unchanged files. JS/TS and Ruby definition parse failures and unresolved static registrations remain incomplete warnings by default. Use `--fail-on-unparseable` for definition parse failures or `--fail-on-incomplete` for all incompleteness.
 
 ## Semantic baselines
 
@@ -110,11 +107,10 @@ cuke-dedup . --baseline .cuke-dedup-baseline.json --fail-on-new 3
 
 Baselines store sorted semantic fingerprints with multiplicity counts. Renames and unrelated line
 changes do not make a finding new, while an additional occurrence beyond the recorded count does.
-Version `1` and `2` baselines can be replaced by running the version `3` tool with
-`--update-baseline`; comparison rejects mismatched schemas and names the regeneration command.
+Version `1` and `2` baselines can be replaced by running the version `3` tool with `--update-baseline`; comparison rejects mismatched schemas and names the regeneration command.
 
-Updates reject `--changed-since` and are skipped after incomplete analysis or an operational
-error, preventing a partial scan from erasing accepted findings.
+Updates reject `--changed-since` and are skipped after incomplete analysis or an operational error,
+preventing a partial scan from erasing accepted findings.
 
 ### Compare against a Git revision
 
@@ -129,33 +125,44 @@ The corresponding Action inputs are:
 ```yaml
 with:
   baseline-from-ref: ${{ github.event.pull_request.base.sha }}
-  fail-on-new: '0'
+  fail-on-new: "0"
 ```
 
-Use checkout with `fetch-depth: 0`, or fetch the revision before analysis. CukeDedup does not
-fetch revisions, initialize submodules, install dependencies, or run project code.
+Use checkout with `fetch-depth: 0`, or fetch the revision before analysis. CukeDedup does not fetch revisions, initialize submodules, install dependencies, or run project code.
 
 The base is scanned in a temporary independent Git checkout using the **current effective
-CukeDedup configuration**, including rule overrides, patterns and suppressions. Missing
-refs/directories, unsupported submodules, base extraction errors, and definitions without a
-feature corpus fail with exit code `2`; none become an empty accepted baseline. Any other
-incomplete base is used for the findings it extracted and reported with a warning, since a finding
-it missed may appear as new; `--fail-on-incomplete` rejects it with exit code `2`. Hooks and
-configured checkout filters are disabled, so Git LFS content is not hydrated. The full repository
-snapshot is limited to 512 MiB of tracked content and 100,000 files; larger repositories can use a
-committed baseline instead. Git submodules anywhere in that snapshot are rejected because their
-content is not materialized.
+CukeDedup configuration**, including rule overrides, patterns and suppressions. Historical
+project module metadata and ignore files remain historical inputs. The same repository-relative
+analysis directory must exist in both trees. Missing refs/directories, unsupported submodules,
+base extraction errors, definitions without a feature corpus, and a base that kept no definitions
+while the current tree has some fail with exit code `2`; none become an empty accepted baseline.
+When neither tree has definitions (a genuinely empty historical suite, or a Ruby registry withdrawn
+by an unresolved `include` in both) there is nothing to compare. Any other incomplete base
+(unresolved registrations, truncated comparisons, definitions partly withdrawn) is used for the
+findings it extracted and reported with a warning, since a finding it missed may appear as new;
+`--fail-on-incomplete` rejects it with exit code `2`.
+Hooks and configured checkout filters are disabled, so Git LFS content is not hydrated.
+The full repository snapshot is limited to 512 MiB of tracked content and 100,000 files;
+larger repositories can use a committed baseline instead. Git submodules anywhere in that
+snapshot are rejected because their content is not materialized.
 
-The new-finding allowance is an additional gate: it does not disable the duplication threshold or
-independent error rules.
+Matching findings are suppressed using the existing semantic fingerprints and multiplicity
+rules. Current modified/untracked files are analyzed normally. `--baseline-from-ref` conflicts
+with `--baseline` and `--update-baseline`; it writes no baseline file or base reports and leaves
+the current index, branch and worktree registration untouched. Temporary files are removed after
+success or failure. This costs a second scan, not a changed-files-only optimization.
+
+The new-finding allowance is an additional gate: it does not disable the duplication threshold
+or independent error rules. Use `--fail-on-incomplete` if incomplete current analysis must also
+fail instead of retaining the normal partial-report behavior.
 
 ## Exit codes
 
-| Code | Meaning                                                                  |
-| ---- | ------------------------------------------------------------------------ |
-| `0`  | The threshold passed and no independent error policy failed.             |
-| `1`  | The threshold, an error-level rule, or the new-finding allowance failed. |
-| `2`  | Discovery, parsing, configuration, or another operational failure.       |
+| Code | Meaning |
+| --- | --- |
+| `0` | The threshold passed and no independent error policy failed. |
+| `1` | The threshold, an error-level rule, or the new-finding allowance failed. |
+| `2` | Discovery, parsing, configuration, or another operational failure. |
 
 Warnings alone do not produce exit code `1`. See [Rules](/docs/rules/) for threshold behavior and
 [Reports](/docs/reports/) for generated artifacts.

@@ -1,15 +1,17 @@
 ---
-import { siteConfig } from '../../lib/site';
+import { getCurrentVersion } from '../../lib/releases';
+
+const version = await getCurrentVersion();
 
 const actionYaml = `permissions:
   contents: read
 
 steps:
-  - uses: actions/checkout@v4
+  - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
     with:
       fetch-depth: 0
       persist-credentials: false
-  - uses: figueiredoluiz/cuke-dedup@${siteConfig.actionVersion}
+  - uses: figueiredoluiz/cuke-dedup@${version}
     with:
       path: .
       threshold: 5
